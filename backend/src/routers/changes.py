@@ -6,8 +6,6 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException
 
 from src.config import get_settings
-
-logger = logging.getLogger(__name__)
 from src.dependencies import get_current_user
 from src.github.client import GitHubClient
 from src.models.user import User
@@ -28,6 +26,8 @@ from src.services.change_service import (
     propose_change,
     submit_review,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/changes", tags=["changes"])
 
