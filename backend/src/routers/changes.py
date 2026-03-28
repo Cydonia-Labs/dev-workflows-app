@@ -1,8 +1,13 @@
 """Routes for proposing, reviewing, and merging document changes via GitHub PRs."""
 
-from fastapi import APIRouter, Depends
+import logging
+
+import httpx
+from fastapi import APIRouter, Depends, HTTPException
 
 from src.config import get_settings
+
+logger = logging.getLogger(__name__)
 from src.dependencies import get_current_user
 from src.github.client import GitHubClient
 from src.models.user import User
@@ -134,6 +139,15 @@ async def submit_pr_review(
     try:
         result = await submit_review(github, pr_number, body.event, body.body)
         return ReviewResponse(id=result["id"], state=result["state"])
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 422:
+            # GitHub returns 422 when you try to approve your own PR
+            logger.warning("Review rejected by GitHub (422) for PR #%d", pr_number)
+            raise HTTPException(
+                status_code=422,
+                detail="Cannot approve or request changes on your own PR. Use 'Comment' instead.",
+            ) from exc
+        raise
     finally:
         await github.close()
 

@@ -143,6 +143,12 @@ export function AppShell() {
         <main className="content">
           <Outlet />
         </main>
+
+        <footer className="app-footer">
+          <span>&copy; {new Date().getFullYear()} Cydonia Labs. All rights reserved.</span>
+          <span className="footer-sep">|</span>
+          <a href="https://github.com/Cydonia-Labs/dev-workflows-app/blob/main/LICENSE">MIT License</a>
+        </footer>
       </div>
     </div>
   );

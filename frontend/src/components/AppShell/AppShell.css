@@ -154,6 +154,25 @@
   }
 }
 
+/* Footer */
+.app-footer {
+  flex-shrink: 0;
+  padding: 1rem 2rem;
+  border-top: 1px solid #e1e4e8;
+  font-size: 0.75rem;
+  color: #888;
+  text-align: center;
+}
+
+.app-footer a {
+  color: #586069;
+}
+
+.footer-sep {
+  margin: 0 0.5rem;
+  color: #d1d5da;
+}
+
 /* Buttons */
 .btn-primary {
   background: #3a3a6a;
