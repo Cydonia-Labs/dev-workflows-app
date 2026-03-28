@@ -122,11 +122,13 @@ async def sync_from_github(
                 db.add(doc)
                 await db.flush()  # Get the doc.id assigned
 
-            # Replace sections: delete old, insert new
+            # Replace sections: delete old, flush, then insert new
             await db.execute(delete(Section).where(Section.document_id == doc.id))
+            await db.flush()
 
             parsed = parse_sections(content)
             _insert_sections(db, doc.id, parsed)
+            await db.flush()
 
             files_updated += 1
 
@@ -141,6 +143,7 @@ async def sync_from_github(
         return files_updated
 
     except Exception as e:
+        await db.rollback()
         sync_log.status = "failed"
         sync_log.error_message = str(e)
         sync_log.completed_at = datetime.now(timezone.utc)

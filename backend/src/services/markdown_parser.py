@@ -138,11 +138,21 @@ def parse_sections(markdown: str) -> list[ParsedSection]:
     current_h2_anchor: str | None = None
     sort_offset = 1 if intro_content else 0
 
+    # Track seen anchors to deduplicate (same as GitHub's behavior)
+    seen_anchors: dict[str, int] = {}
+
     for i, match in enumerate(headings):
         hashes = match.group(1)
         heading_text = match.group(2).strip()
         level = len(hashes)
         anchor = generate_anchor(heading_text)
+
+        # Deduplicate: append -1, -2, etc. for repeated anchors
+        if anchor in seen_anchors:
+            seen_anchors[anchor] += 1
+            anchor = f"{anchor}-{seen_anchors[anchor]}"
+        else:
+            seen_anchors[anchor] = 0
 
         # Determine content: from end of this heading line to start of next heading
         content_start_pos = match.end()
