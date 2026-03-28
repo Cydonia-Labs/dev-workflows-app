@@ -38,8 +38,9 @@ export function DocViewPage() {
    * For H2 sections, returns itself. For H3, returns its parent H2.
    */
   function getDiscussionAnchor(sectionAnchor: string): string | null {
+    const sections = doc?.sections ?? [];
     let lastH2: string | null = null;
-    for (const s of doc.sections) {
+    for (const s of sections) {
       if (s.heading_level === 2) lastH2 = s.anchor;
       if (s.anchor === sectionAnchor) return lastH2;
     }
