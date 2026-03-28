@@ -11,6 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.config import get_settings
+from src.routers import auth, changes, comments, documents, notifications, webhooks
 
 
 @asynccontextmanager
@@ -50,6 +51,14 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Register routers
+    application.include_router(auth.router)
+    application.include_router(documents.router)
+    application.include_router(comments.router)
+    application.include_router(changes.router)
+    application.include_router(notifications.router)
+    application.include_router(webhooks.router)
 
     @application.get("/api/health")
     async def health_check() -> dict[str, str]:

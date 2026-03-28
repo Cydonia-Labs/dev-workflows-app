@@ -2,21 +2,21 @@
 
 Feature tracking for dev-workflows-app. Each phase builds on the previous and produces a runnable increment.
 
-## Phase 1: Foundation (Current)
+## Phase 1: Foundation
 
 - [x] Architecture and specification
-- [ ] Repo scaffolding (monorepo structure, Makefile, docker-compose, CI, CLAUDE.md)
-- [ ] Backend foundation (FastAPI app, config, database, ORM models, Alembic migration)
-- [ ] Content sync pipeline (markdown parser, sync service, webhook endpoint, seed script)
+- [x] Repo scaffolding (monorepo structure, Makefile, docker-compose, CI, CLAUDE.md)
+- [x] Backend foundation (FastAPI app, config, database, ORM models, Alembic migration)
+- [x] Content sync pipeline (markdown parser, sync service, webhook endpoint, seed script)
 
 ## Phase 2: Core Backend
 
-- [ ] GitHub OAuth (login flow, JWT sessions, get_current_user dependency)
-- [ ] Documents API (list, get by slug, get section)
-- [ ] Comments API (CRUD, threading, resolve)
-- [ ] Changes API (propose PR, list PRs, get PR detail, submit review, merge)
-- [ ] Notifications API (list, mark read, push subscription management)
-- [ ] Webhook endpoint (GitHub push events → content sync)
+- [x] GitHub OAuth (login flow, JWT sessions, get_current_user dependency)
+- [x] Documents API (list, get by slug, get section)
+- [x] Comments API (CRUD, threading, resolve)
+- [x] Changes API (propose PR, list PRs, get PR detail, submit review, merge)
+- [x] Notifications API (list, mark read, push subscription management)
+- [x] Webhook endpoint (GitHub push events → content sync)
 
 ## Phase 3: Frontend — Browsing
 
