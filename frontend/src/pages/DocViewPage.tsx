@@ -12,6 +12,7 @@ import { useParams, Link } from "react-router-dom";
 import { useDocument } from "@/hooks/useDocuments";
 import { useAuth } from "@/contexts/AuthContext";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
+import { SectionComments } from "@/components/SectionComments";
 import "./DocViewPage.css";
 
 /** View a single handbook document with table of contents. */
@@ -56,7 +57,20 @@ export function DocViewPage() {
         </nav>
 
         <article className="doc-content">
-          <MarkdownRenderer content={doc.raw_markdown} />
+          {doc.sections.map((section) => (
+            <div key={section.anchor} id={section.anchor} className="doc-section">
+              <MarkdownRenderer
+                content={`${"#".repeat(section.heading_level)} ${section.title}\n\n${section.content}`}
+              />
+              {section.heading_level === 2 && (
+                <SectionComments
+                  slug={doc.slug}
+                  anchor={section.anchor}
+                  commentCount={section.comment_count}
+                />
+              )}
+            </div>
+          ))}
         </article>
       </div>
     </div>

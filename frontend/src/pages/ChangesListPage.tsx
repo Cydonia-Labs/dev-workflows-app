@@ -4,6 +4,7 @@
  * @module pages/ChangesListPage
  */
 
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/api/client";
 import type { PRSummary } from "@/types/changes";
@@ -24,9 +25,9 @@ export function ChangesListPage() {
         <ul>
           {changes.map((pr) => (
             <li key={pr.number}>
-              <a href={pr.url} target="_blank" rel="noopener noreferrer">
+              <Link to={`/changes/${pr.number}`}>
                 #{pr.number}: {pr.title}
-              </a>
+              </Link>
               <span> by {pr.author}</span>
             </li>
           ))}

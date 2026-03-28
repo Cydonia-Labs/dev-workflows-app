@@ -17,6 +17,8 @@ import { DocViewPage } from "@/pages/DocViewPage";
 import { AuthCallbackPage } from "@/pages/AuthCallbackPage";
 import { NotificationsPage } from "@/pages/NotificationsPage";
 import { ChangesListPage } from "@/pages/ChangesListPage";
+import { ChangeDetailPage } from "@/pages/ChangeDetailPage";
+import { ProposeChangePage } from "@/pages/ProposeChangePage";
 
 /** Shared query client for TanStack Query. */
 const queryClient = new QueryClient({
@@ -40,6 +42,8 @@ export function App() {
               <Route path="/docs" element={<DocsListPage />} />
               <Route path="/docs/:slug" element={<DocViewPage />} />
               <Route path="/changes" element={<ChangesListPage />} />
+              <Route path="/changes/new" element={<ProposeChangePage />} />
+              <Route path="/changes/:prNumber" element={<ChangeDetailPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
             </Route>
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
