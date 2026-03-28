@@ -10,6 +10,7 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/hooks/useDocuments";
+import { NotificationBell } from "@/components/NotificationBell";
 import "./AppShell.css";
 
 /** Top-level layout component wrapping all routes. */
@@ -67,6 +68,7 @@ export function AppShell() {
         <header className="top-bar">
           <div className="top-bar-left" />
           <div className="top-bar-right">
+            <NotificationBell />
             {isAuthenticated ? (
               <div className="user-menu">
                 {user?.avatar_url && <img src={user.avatar_url} alt="" className="avatar" />}

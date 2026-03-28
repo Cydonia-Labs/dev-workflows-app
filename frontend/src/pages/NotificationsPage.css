@@ -1,0 +1,45 @@
+.notifications-page h1 {
+  margin-bottom: 0;
+}
+
+.notifications-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.push-settings {
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  background: #f6f8fa;
+  border-radius: 6px;
+}
+
+.push-status {
+  font-size: 0.85rem;
+  color: #586069;
+  margin: 0;
+}
+
+.push-denied {
+  color: #d73a49;
+}
+
+.notification-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.notification-link:hover {
+  text-decoration: none;
+}
+
+.notification-link strong:hover {
+  text-decoration: underline;
+}
+
+.no-notifications {
+  color: #888;
+  margin-top: 1rem;
+}
