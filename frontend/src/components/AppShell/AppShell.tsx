@@ -77,9 +77,14 @@ export function AppShell() {
     <div className="app-shell">
       {/* Desktop sidebar */}
       <aside className="sidebar">
-        <Link to="/" className="sidebar-brand">
-          Dev Workflows
-        </Link>
+        <div className="sidebar-brand-row">
+          <a href="https://cydonialabs.com" target="_blank" rel="noopener noreferrer">
+            <img src="/logo.png" alt="Cydonia Labs" className="sidebar-logo" />
+          </a>
+          <Link to="/" className="sidebar-brand">
+            Dev Workflows
+          </Link>
+        </div>
         <nav className="sidebar-nav">{navContent}</nav>
       </aside>
 
