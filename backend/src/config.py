@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     github_client_id: str
     github_client_secret: str
     github_webhook_secret: str
-    github_repo_owner: str = "stevemcgregory"
+    github_repo_owner: str = "Cydonia-Labs"
     github_repo_name: str = "dev-workflows"
     vapid_private_key: str = ""
     vapid_public_key: str = ""

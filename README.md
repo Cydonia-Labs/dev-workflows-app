@@ -1,6 +1,6 @@
 # dev-workflows-app
 
-A web app for browsing, discussing, and collaboratively improving the [dev-workflows](https://github.com/stevemcgregory/dev-workflows) engineering handbook.
+A web app for browsing, discussing, and collaboratively improving the [dev-workflows](https://github.com/Cydonia-Labs/dev-workflows) engineering handbook.
 
 ## Features
 

@@ -46,7 +46,7 @@ Backend → pywebpush → Push Service → Service Worker → Notification
 
 ## Source Repo
 
-The content comes from: `stevemcgregory/dev-workflows` on GitHub
+The content comes from: `Cydonia-Labs/dev-workflows` on GitHub
 - 10 markdown docs in `docs/` directory
 - No frontmatter, H1 title, H2/H3 sections, code blocks, tables
 - Each doc ends with a "Scaling Checklist"
