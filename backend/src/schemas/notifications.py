@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class PushKeys(BaseModel):
@@ -13,8 +13,8 @@ class PushKeys(BaseModel):
         auth: Client authentication secret.
     """
 
-    p256dh: str
-    auth: str
+    p256dh: str = Field(min_length=1, max_length=500)
+    auth: str = Field(min_length=1, max_length=500)
 
 
 class PushSubscriptionRequest(BaseModel):
@@ -25,7 +25,7 @@ class PushSubscriptionRequest(BaseModel):
         keys: Encryption keys from the browser's PushSubscription.
     """
 
-    endpoint: str
+    endpoint: str = Field(min_length=1, max_length=2048)
     keys: PushKeys
 
 
@@ -55,10 +55,10 @@ class MarkReadRequest(BaseModel):
     """Request body for marking notifications as read.
 
     Attributes:
-        notification_ids: List of notification IDs to mark as read.
+        notification_ids: List of notification IDs to mark as read. Maximum 100 per request.
     """
 
-    notification_ids: list[str]
+    notification_ids: list[str] = Field(max_length=100)
 
 
 class VapidKeyResponse(BaseModel):

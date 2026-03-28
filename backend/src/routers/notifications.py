@@ -1,6 +1,6 @@
 """Notification and push subscription routes."""
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import get_settings
@@ -27,8 +27,8 @@ router = APIRouter(prefix="/api/notifications", tags=["notifications"])
 async def list_notifications(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    limit: int = 50,
-    offset: int = 0,
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
 ) -> list[NotificationResponse]:
     """Return the authenticated user's notifications, newest first.
 

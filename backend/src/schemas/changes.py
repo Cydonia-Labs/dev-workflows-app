@@ -16,10 +16,11 @@ class ProposeChangeRequest(BaseModel):
         updated_markdown: The full updated markdown content.
     """
 
-    document_slug: str
+    document_slug: str = Field(min_length=1, max_length=100, pattern=r"^[a-z0-9\-]+$")
     title: str = Field(min_length=5, max_length=200)
     description: str = Field(max_length=5000)
-    updated_markdown: str
+    # 500 KB limit — handbook docs are typically 5-30 KB
+    updated_markdown: str = Field(max_length=512_000)
 
 
 class ProposeChangeResponse(BaseModel):

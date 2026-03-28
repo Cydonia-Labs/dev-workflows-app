@@ -6,6 +6,7 @@ from src.config import get_settings
 from src.dependencies import get_current_user
 from src.github.client import GitHubClient
 from src.models.user import User
+from src.services.auth_service import get_decrypted_github_token
 from src.schemas.changes import (
     MergeResponse,
     PRDetail,
@@ -37,7 +38,7 @@ def _get_github_client(user: User) -> GitHubClient:
     """
     settings = get_settings()
     return GitHubClient(
-        token=user.github_token,
+        token=get_decrypted_github_token(user),
         repo_owner=settings.github_repo_owner,
         repo_name=settings.github_repo_name,
     )

@@ -1,6 +1,6 @@
 """Document browsing routes."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Path
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -37,7 +37,7 @@ async def list_documents(
 
 @router.get("/{slug}")
 async def get_document(
-    slug: str,
+    slug: str = Path(max_length=100, pattern=r"^[a-z0-9\-]+$"),
     db: AsyncSession = Depends(get_db),
 ) -> DocumentDetail:
     """Return a document with its parsed sections.
@@ -90,8 +90,8 @@ async def get_document(
 
 @router.get("/{slug}/sections/{anchor}")
 async def get_section(
-    slug: str,
-    anchor: str,
+    slug: str = Path(max_length=100, pattern=r"^[a-z0-9\-]+$"),
+    anchor: str = Path(max_length=255, pattern=r"^[a-z0-9\-]+$"),
     db: AsyncSession = Depends(get_db),
 ) -> SectionResponse:
     """Return a single section from a document.

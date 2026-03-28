@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import get_settings
 from src.models.user import User
+from src.services.token_encryption import decrypt_token, encrypt_token
 
 # GitHub OAuth endpoints
 GITHUB_AUTHORIZE_URL = "https://github.com/login/oauth/authorize"
@@ -105,16 +106,20 @@ async def upsert_user(db: AsyncSession, github_user: dict, github_token: str) ->
     """Create or update a user record from GitHub profile data.
 
     If a user with the same github_id exists, updates their profile
-    and token. Otherwise creates a new user.
+    and token. Otherwise creates a new user. The GitHub token is
+    encrypted before storage.
 
     Args:
         db: Database session.
         github_user: GitHub user profile dict (from fetch_github_user).
-        github_token: The user's GitHub OAuth access token.
+        github_token: The user's GitHub OAuth access token (plaintext).
 
     Returns:
         The created or updated User instance.
     """
+    settings = get_settings()
+    encrypted_token = encrypt_token(github_token, settings.secret_key)
+
     stmt = select(User).where(User.github_id == github_user["id"])
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
@@ -123,20 +128,36 @@ async def upsert_user(db: AsyncSession, github_user: dict, github_token: str) ->
         user.github_login = github_user["login"]
         user.display_name = github_user.get("name") or github_user["login"]
         user.avatar_url = github_user.get("avatar_url")
-        user.github_token = github_token
+        user.github_token = encrypted_token
     else:
         user = User(
             github_id=github_user["id"],
             github_login=github_user["login"],
             display_name=github_user.get("name") or github_user["login"],
             avatar_url=github_user.get("avatar_url"),
-            github_token=github_token,
+            github_token=encrypted_token,
         )
         db.add(user)
 
     await db.commit()
     await db.refresh(user)
     return user
+
+
+def get_decrypted_github_token(user: User) -> str:
+    """Decrypt a user's stored GitHub token for API calls.
+
+    Args:
+        user: The user whose token to decrypt.
+
+    Returns:
+        The plaintext GitHub OAuth token.
+
+    Raises:
+        cryptography.fernet.InvalidToken: If decryption fails.
+    """
+    settings = get_settings()
+    return decrypt_token(user.github_token, settings.secret_key)
 
 
 def create_session_token(user_id: str) -> str:
