@@ -1,0 +1,81 @@
+.home-page {
+  max-width: 100%;
+}
+
+.hero {
+  margin-bottom: 2.5rem;
+}
+
+.hero h1 {
+  font-size: 2.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.hero-sub {
+  font-size: 1.1rem;
+  color: #586069;
+  line-height: 1.6;
+}
+
+.hero-sub a {
+  font-weight: 600;
+}
+
+/* Principles */
+.principles {
+  margin-bottom: 2.5rem;
+}
+
+.principles h2 {
+  margin-bottom: 1.25rem;
+}
+
+.principles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+.principle {
+  padding: 1.25rem;
+  background: #fff;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+}
+
+.principle h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #1a1a2e;
+}
+
+.principle p {
+  font-size: 0.9rem;
+  color: #586069;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Docs section */
+.docs-section {
+  margin-bottom: 2rem;
+}
+
+.docs-section h2 {
+  margin-bottom: 0.5rem;
+}
+
+.docs-section > p {
+  color: #586069;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 1.75rem;
+  }
+
+  .principles-grid {
+    grid-template-columns: 1fr;
+  }
+}
