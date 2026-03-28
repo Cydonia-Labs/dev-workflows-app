@@ -1,9 +1,18 @@
+/* Full doc view — header fixed, content scrolls independently */
 .doc-view {
   max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 53px); /* subtract top-bar height */
+  overflow: hidden;
 }
 
+/* Fixed header area — title, actions, discussion panel */
 .doc-header {
-  margin-bottom: 1.5rem;
+  flex-shrink: 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e1e4e8;
+  margin-bottom: 0;
 }
 
 .doc-header h1 {
@@ -13,24 +22,81 @@
 .doc-meta {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: space-between;
   color: #666;
   font-size: 0.875rem;
 }
 
+.doc-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-secondary {
+  background: #e1e4e8;
+  color: #24292e;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.btn-secondary:hover {
+  background: #d1d5da;
+}
+
+/* Discussion panel — sits between header and content, also fixed */
+.discussion-panel {
+  flex-shrink: 0;
+  background: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.discussion-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.discussion-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.section-picker {
+  flex: 1;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #d1d5da;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: #fff;
+  max-width: 400px;
+}
+
+/* Scrollable content area — ToC + article */
 .doc-layout {
   display: flex;
   gap: 2rem;
+  flex: 1;
+  overflow-y: auto;
+  padding-top: 1rem;
 }
 
-/* Table of contents */
+/* Table of contents — sticky within the scrollable area */
 .table-of-contents {
   width: 220px;
   flex-shrink: 0;
   position: sticky;
-  top: 1rem;
+  top: 0;
   align-self: flex-start;
-  max-height: calc(100vh - 6rem);
+  max-height: calc(100vh - 12rem);
   overflow-y: auto;
 }
 
@@ -86,8 +152,20 @@
 }
 
 @media (max-width: 768px) {
+  .doc-view {
+    height: auto;
+    overflow: visible;
+  }
+
+  .doc-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
   .doc-layout {
     flex-direction: column;
+    overflow: visible;
   }
 
   .table-of-contents {

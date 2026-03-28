@@ -1,31 +1,5 @@
 .section-comments {
-  margin: 1rem 0;
-  border-top: 1px solid #e1e4e8;
-  padding-top: 0.75rem;
-}
-
-.comments-toggle {
-  background: none;
-  border: 1px solid #d1d5da;
-  border-radius: 6px;
-  padding: 0.35rem 0.75rem;
-  font-size: 0.8rem;
-  color: #586069;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.comments-toggle:hover {
-  background: #f6f8fa;
-}
-
-.comment-count {
-  margin-left: 0.35rem;
-  font-weight: 600;
-}
-
-.comments-panel {
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 .comments-loading,

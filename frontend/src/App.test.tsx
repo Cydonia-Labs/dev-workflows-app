@@ -5,6 +5,6 @@ import { App } from "./App";
 describe("App", () => {
   it("renders without crashing", () => {
     render(<App />);
-    expect(screen.getByText("Dev Workflows")).toBeInTheDocument();
+    expect(screen.getAllByText("Dev Workflows").length).toBeGreaterThanOrEqual(1);
   });
 });

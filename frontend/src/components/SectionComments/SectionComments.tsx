@@ -2,7 +2,8 @@
  * Threaded comments panel for a document section.
  *
  * Displays existing comment threads and a composer for new comments.
- * Expandable/collapsible per section, with reply support.
+ * Always rendered expanded — visibility is controlled by the parent
+ * (DocViewPage's discussion panel).
  *
  * @module components/SectionComments
  */
@@ -20,23 +21,22 @@ interface SectionCommentsProps {
   slug: string;
   /** Section anchor for fetching comments. */
   anchor: string;
-  /** Number of existing comments (for the toggle label). */
+  /** Number of existing comments (shown in empty state). */
   commentCount: number;
 }
 
 /**
- * Expandable comment panel for a single document section.
+ * Comment threads and composer for a single document section.
  *
- * Shows a toggle button with the comment count. When expanded,
- * displays threaded comments and a composer for new comments.
+ * Rendered inline within the discussion panel. Shows threads with
+ * reply support and a composer for new comments.
  *
  * @example
  * ```tsx
  * <SectionComments slug="testing" anchor="test-pyramid" commentCount={3} />
  * ```
  */
-export function SectionComments({ slug, anchor, commentCount }: SectionCommentsProps) {
-  const [expanded, setExpanded] = useState(false);
+export function SectionComments({ slug, anchor }: SectionCommentsProps) {
   const { data: threads, isLoading } = useComments(slug, anchor);
   const createComment = useCreateComment(slug, anchor);
   const { isAuthenticated, login } = useAuth();
@@ -44,60 +44,51 @@ export function SectionComments({ slug, anchor, commentCount }: SectionCommentsP
 
   return (
     <div className="section-comments">
-      <button className="comments-toggle" onClick={() => setExpanded(!expanded)}>
-        {expanded ? "Hide" : "Show"} discussion
-        {commentCount > 0 && <span className="comment-count">({commentCount})</span>}
-      </button>
-
-      {expanded && (
-        <div className="comments-panel">
-          {isLoading ? (
-            <p className="comments-loading">Loading comments...</p>
-          ) : threads && threads.length > 0 ? (
-            <div className="comment-threads">
-              {threads.map((thread) => (
-                <div key={thread.id} className="comment-thread">
-                  <CommentItem comment={thread} onReply={() => setReplyingTo(thread.id)} />
-                  {thread.replies.map((reply) => (
-                    <div key={reply.id} className="comment-reply">
-                      <CommentItem comment={reply} />
-                    </div>
-                  ))}
-                  {replyingTo === thread.id && isAuthenticated && (
-                    <div className="reply-composer">
-                      <CommentComposer
-                        onSubmit={(body) => {
-                          createComment.mutate({ body, parentId: thread.id });
-                          setReplyingTo(null);
-                        }}
-                        onCancel={() => setReplyingTo(null)}
-                        placeholder="Write a reply..."
-                        isSubmitting={createComment.isPending}
-                      />
-                    </div>
-                  )}
+      {isLoading ? (
+        <p className="comments-loading">Loading comments...</p>
+      ) : threads && threads.length > 0 ? (
+        <div className="comment-threads">
+          {threads.map((thread) => (
+            <div key={thread.id} className="comment-thread">
+              <CommentItem comment={thread} onReply={() => setReplyingTo(thread.id)} />
+              {thread.replies.map((reply) => (
+                <div key={reply.id} className="comment-reply">
+                  <CommentItem comment={reply} />
                 </div>
               ))}
+              {replyingTo === thread.id && isAuthenticated && (
+                <div className="reply-composer">
+                  <CommentComposer
+                    onSubmit={(body) => {
+                      createComment.mutate({ body, parentId: thread.id });
+                      setReplyingTo(null);
+                    }}
+                    onCancel={() => setReplyingTo(null)}
+                    placeholder="Write a reply..."
+                    isSubmitting={createComment.isPending}
+                  />
+                </div>
+              )}
             </div>
-          ) : (
-            <p className="no-comments">No comments yet. Start the discussion.</p>
-          )}
-
-          {isAuthenticated ? (
-            <CommentComposer
-              onSubmit={(body) => createComment.mutate({ body })}
-              placeholder="Add a comment..."
-              isSubmitting={createComment.isPending}
-            />
-          ) : (
-            <p className="login-prompt">
-              <button onClick={login} className="btn-text">
-                Sign in with GitHub
-              </button>{" "}
-              to join the discussion.
-            </p>
-          )}
+          ))}
         </div>
+      ) : (
+        <p className="no-comments">No comments yet. Start the discussion.</p>
+      )}
+
+      {isAuthenticated ? (
+        <CommentComposer
+          onSubmit={(body) => createComment.mutate({ body })}
+          placeholder="Add a comment..."
+          isSubmitting={createComment.isPending}
+        />
+      ) : (
+        <p className="login-prompt">
+          <button onClick={login} className="btn-text">
+            Sign in with GitHub
+          </button>{" "}
+          to join the discussion.
+        </p>
       )}
     </div>
   );
