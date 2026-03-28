@@ -34,14 +34,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
-        response.headers["Strict-Transport-Security"] = (
-            "max-age=31536000; includeSubDomains"
-        )
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         # Disable legacy XSS filter — modern CSP is the correct defense
         response.headers["X-XSS-Protection"] = "0"
-        response.headers["Permissions-Policy"] = (
-            "camera=(), microphone=(), geolocation=()"
-        )
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
 
         return response

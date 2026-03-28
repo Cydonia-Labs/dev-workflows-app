@@ -7,7 +7,7 @@ into PostgreSQL.
 
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -109,7 +109,7 @@ async def sync_from_github(
                 doc.raw_markdown = content
                 doc.github_sha = commit_sha
                 doc.sort_order = sort_order
-                doc.synced_at = datetime.now(timezone.utc)
+                doc.synced_at = datetime.now(UTC)
             else:
                 doc = Document(
                     slug=slug,
@@ -137,7 +137,7 @@ async def sync_from_github(
         # Update sync log
         sync_log.status = "completed"
         sync_log.files_updated = files_updated
-        sync_log.completed_at = datetime.now(timezone.utc)
+        sync_log.completed_at = datetime.now(UTC)
         await db.commit()
 
         return files_updated
@@ -146,7 +146,7 @@ async def sync_from_github(
         await db.rollback()
         sync_log.status = "failed"
         sync_log.error_message = str(e)
-        sync_log.completed_at = datetime.now(timezone.utc)
+        sync_log.completed_at = datetime.now(UTC)
         await db.commit()
         raise
 

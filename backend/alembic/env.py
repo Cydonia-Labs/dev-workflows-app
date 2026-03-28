@@ -12,20 +12,18 @@ from pathlib import Path
 # Ensure the backend package is importable when Alembic runs standalone
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from alembic import context
-from sqlalchemy import pool
-from sqlalchemy.engine import Connection
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, pool
 
+from alembic import context
 from src.database import Base
 from src.models import (  # noqa: F401 — imported for side effects (table registration)
-    User,
-    Document,
-    Section,
     Comment,
+    Document,
     Notification,
     PushSubscription,
+    Section,
     SyncLog,
+    User,
 )
 
 config = context.config

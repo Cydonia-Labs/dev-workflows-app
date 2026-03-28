@@ -6,7 +6,6 @@ correctly on GitHub.
 """
 
 import base64
-import uuid
 
 import httpx
 
@@ -303,9 +302,7 @@ class GitHubClient:
         Raises:
             httpx.HTTPStatusError: If the PR doesn't exist.
         """
-        response = await self._client.get(
-            f"{self._repo_path}/pulls/{pr_number}/comments"
-        )
+        response = await self._client.get(f"{self._repo_path}/pulls/{pr_number}/comments")
         response.raise_for_status()
         return response.json()
 

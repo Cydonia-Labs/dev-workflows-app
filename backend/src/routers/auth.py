@@ -7,8 +7,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-logger = logging.getLogger(__name__)
-
 from src.database import get_db
 from src.dependencies import get_current_user
 from src.models.user import User
@@ -20,6 +18,8 @@ from src.services.auth_service import (
     fetch_github_user,
     upsert_user,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -71,9 +71,9 @@ async def github_callback(
 
     try:
         github_token = await exchange_code_for_token(code)
-    except Exception:
+    except Exception as exc:
         logger.exception("GitHub OAuth token exchange failed")
-        raise HTTPException(status_code=502, detail="Authentication failed")
+        raise HTTPException(status_code=502, detail="Authentication failed") from exc
 
     github_user = await fetch_github_user(github_token)
     user = await upsert_user(db, github_user, github_token)

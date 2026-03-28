@@ -29,10 +29,7 @@ async def list_documents(
     stmt = select(Document).order_by(Document.sort_order)
     result = await db.execute(stmt)
     docs = result.scalars().all()
-    return [
-        DocumentSummary(slug=d.slug, title=d.title, sort_order=d.sort_order)
-        for d in docs
-    ]
+    return [DocumentSummary(slug=d.slug, title=d.title, sort_order=d.sort_order) for d in docs]
 
 
 @router.get("/{slug}")
@@ -52,11 +49,7 @@ async def get_document(
     Raises:
         HTTPException(404): If no document matches the slug.
     """
-    stmt = (
-        select(Document)
-        .where(Document.slug == slug)
-        .options(selectinload(Document.sections))
-    )
+    stmt = select(Document).where(Document.slug == slug).options(selectinload(Document.sections))
     result = await db.execute(stmt)
     doc = result.scalar_one_or_none()
 
@@ -107,11 +100,7 @@ async def get_section(
     Raises:
         HTTPException(404): If the document or section is not found.
     """
-    stmt = (
-        select(Section)
-        .join(Document)
-        .where(Document.slug == slug, Section.anchor == anchor)
-    )
+    stmt = select(Section).join(Document).where(Document.slug == slug, Section.anchor == anchor)
     result = await db.execute(stmt)
     section = result.scalar_one_or_none()
 

@@ -1,7 +1,7 @@
 """Document model for handbook markdown files."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, SmallInteger, String, Text
 from sqlalchemy.dialects.postgresql import UUID
@@ -33,9 +33,7 @@ class Document(Base):
 
     __tablename__ = "documents"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     slug: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     filename: Mapped[str] = mapped_column(String(255), nullable=False)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
@@ -43,15 +41,15 @@ class Document(Base):
     github_sha: Mapped[str] = mapped_column(String(40), nullable=False)
     sort_order: Mapped[int] = mapped_column(SmallInteger, default=0)
     synced_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
     )
 
     sections = relationship("Section", back_populates="document", cascade="all, delete-orphan")

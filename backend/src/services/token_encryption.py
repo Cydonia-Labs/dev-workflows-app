@@ -8,8 +8,7 @@ from the application's SECRET_KEY using PBKDF2.
 import base64
 import hashlib
 
-from cryptography.fernet import Fernet, InvalidToken
-
+from cryptography.fernet import Fernet
 
 # Salt for key derivation — fixed per application.
 # Changing this invalidates all encrypted tokens in the database.

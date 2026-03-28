@@ -3,7 +3,7 @@
 import uuid
 
 from src.github.client import GitHubClient
-from src.schemas.changes import MergeResponse, PRDetail, PRSummary, ProposeChangeResponse
+from src.schemas.changes import MergeResponse, PRDetail, ProposeChangeResponse, PRSummary
 
 
 async def propose_change(

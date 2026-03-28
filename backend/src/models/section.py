@@ -1,7 +1,7 @@
 """Section model for parsed heading-level sections within a document."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, ForeignKey, SmallInteger, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
@@ -36,9 +36,7 @@ class Section(Base):
     __tablename__ = "sections"
     __table_args__ = (UniqueConstraint("document_id", "anchor"),)
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     document_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("documents.id", ondelete="CASCADE"), nullable=False
     )
@@ -51,7 +49,7 @@ class Section(Base):
         UUID(as_uuid=True), ForeignKey("sections.id", ondelete="CASCADE")
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )
 
     document = relationship("Document", back_populates="sections")

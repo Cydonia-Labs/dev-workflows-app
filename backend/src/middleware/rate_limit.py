@@ -100,9 +100,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         # Determine client IP (respects X-Forwarded-For for reverse proxies)
-        client_ip = request.headers.get(
-            "X-Forwarded-For", request.client.host if request.client else "unknown"
-        ).split(",")[0].strip()
+        client_ip = (
+            request.headers.get(
+                "X-Forwarded-For", request.client.host if request.client else "unknown"
+            )
+            .split(",")[0]
+            .strip()
+        )
 
         method = request.method.upper()
         is_write = method in _WRITE_METHODS

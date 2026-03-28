@@ -1,6 +1,6 @@
 """Authentication service for GitHub OAuth and JWT session management."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import httpx
 import jwt
@@ -172,8 +172,8 @@ def create_session_token(user_id: str) -> str:
     settings = get_settings()
     payload = {
         "sub": user_id,
-        "exp": datetime.now(timezone.utc) + timedelta(days=SESSION_TTL_DAYS),
-        "iat": datetime.now(timezone.utc),
+        "exp": datetime.now(UTC) + timedelta(days=SESSION_TTL_DAYS),
+        "iat": datetime.now(UTC),
     }
     return jwt.encode(payload, settings.secret_key, algorithm=JWT_ALGORITHM)
 

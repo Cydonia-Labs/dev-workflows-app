@@ -6,16 +6,16 @@ from src.config import get_settings
 from src.dependencies import get_current_user
 from src.github.client import GitHubClient
 from src.models.user import User
-from src.services.auth_service import get_decrypted_github_token
 from src.schemas.changes import (
     MergeResponse,
     PRDetail,
-    PRSummary,
     ProposeChangeRequest,
     ProposeChangeResponse,
+    PRSummary,
     ReviewResponse,
     SubmitReviewRequest,
 )
+from src.services.auth_service import get_decrypted_github_token
 from src.services.change_service import (
     get_pr_detail,
     list_open_prs,

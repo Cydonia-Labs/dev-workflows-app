@@ -4,7 +4,7 @@ import hashlib
 import hmac
 import logging
 
-from fastapi import APIRouter, HTTPException, Header, Request
+from fastapi import APIRouter, Header, HTTPException, Request
 
 from src.config import get_settings
 from src.database import async_session_factory
@@ -27,9 +27,7 @@ def _verify_signature(payload: bytes, signature: str, secret: str) -> bool:
     Returns:
         True if the signature is valid, False otherwise.
     """
-    expected = "sha256=" + hmac.new(
-        secret.encode(), payload, hashlib.sha256
-    ).hexdigest()
+    expected = "sha256=" + hmac.new(secret.encode(), payload, hashlib.sha256).hexdigest()
     return hmac.compare_digest(expected, signature)
 
 
@@ -96,8 +94,8 @@ async def github_webhook(
             files_updated = await sync_from_github(db, github, commit_sha)
             logger.info("Sync completed: %d files updated", files_updated)
             return {"status": "synced", "files_updated": str(files_updated)}
-        except Exception:
+        except Exception as exc:
             logger.exception("Sync failed for commit %s", commit_sha)
-            raise HTTPException(status_code=500, detail="Sync failed")
+            raise HTTPException(status_code=500, detail="Sync failed") from exc
         finally:
             await github.close()

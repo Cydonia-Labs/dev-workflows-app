@@ -1,7 +1,7 @@
 """Sync log model for tracking content sync operations from GitHub."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, SmallInteger, String, Text
 from sqlalchemy.dialects.postgresql import UUID
@@ -28,14 +28,12 @@ class SyncLog(Base):
 
     __tablename__ = "sync_log"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     github_sha: Mapped[str] = mapped_column(String(40), nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False)
     files_updated: Mapped[int | None] = mapped_column(SmallInteger)
     error_message: Mapped[str | None] = mapped_column(Text)
     started_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

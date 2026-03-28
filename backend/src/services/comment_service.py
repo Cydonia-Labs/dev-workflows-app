@@ -24,11 +24,7 @@ async def get_section_by_slug_and_anchor(
     Returns:
         The Section if found, None otherwise.
     """
-    stmt = (
-        select(Section)
-        .join(Document)
-        .where(Document.slug == slug, Section.anchor == anchor)
-    )
+    stmt = select(Section).join(Document).where(Document.slug == slug, Section.anchor == anchor)
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
 
@@ -146,11 +142,7 @@ async def get_comment_by_id(db: AsyncSession, comment_id) -> Comment | None:
     Returns:
         The Comment if found, None otherwise.
     """
-    stmt = (
-        select(Comment)
-        .where(Comment.id == comment_id)
-        .options(selectinload(Comment.author))
-    )
+    stmt = select(Comment).where(Comment.id == comment_id).options(selectinload(Comment.author))
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
 

@@ -3,8 +3,6 @@
 import hashlib
 import hmac
 import json
-
-
 import os
 
 # Must match the GITHUB_WEBHOOK_SECRET set in conftest.py
@@ -20,9 +18,7 @@ def _sign_payload(payload: bytes) -> str:
     Returns:
         The signature string in sha256=<hex> format.
     """
-    return "sha256=" + hmac.new(
-        WEBHOOK_SECRET.encode(), payload, hashlib.sha256
-    ).hexdigest()
+    return "sha256=" + hmac.new(WEBHOOK_SECRET.encode(), payload, hashlib.sha256).hexdigest()
 
 
 def test_webhook_rejects_missing_signature(client):

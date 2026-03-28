@@ -10,7 +10,6 @@ import re
 import unicodedata
 from dataclasses import dataclass
 
-
 # Matches H2 and H3 headings at the start of a line
 _HEADING_PATTERN = re.compile(r"^(#{2,3})\s+(.+)$", re.MULTILINE)
 
@@ -71,7 +70,7 @@ def generate_anchor(heading_text: str) -> str:
 
 
 def extract_title(markdown: str) -> str:
-    """Extract the document title from the first H1 heading.
+    r"""Extract the document title from the first H1 heading.
 
     Args:
         markdown: Raw markdown content.
@@ -80,7 +79,7 @@ def extract_title(markdown: str) -> str:
         The title text, or "Untitled" if no H1 heading is found.
 
     Example:
-        >>> extract_title("# Git & Branching\\n\\nSome content")
+        >>> extract_title("# Git & Branching\n\nSome content")
         'Git & Branching'
     """
     match = re.match(r"^#\s+(.+)$", markdown, re.MULTILINE)
@@ -88,7 +87,7 @@ def extract_title(markdown: str) -> str:
 
 
 def parse_sections(markdown: str) -> list[ParsedSection]:
-    """Parse a markdown document into sections split at H2 and H3 headings.
+    r"""Parse a markdown document into sections split at H2 and H3 headings.
 
     Content before the first H2 heading (after the H1 title) is captured
     as an "intro" section with heading_level=2. Each subsequent H2 or H3
@@ -103,7 +102,7 @@ def parse_sections(markdown: str) -> list[ParsedSection]:
         document's structure.
 
     Example:
-        >>> sections = parse_sections("# Title\\n\\nIntro text\\n\\n## Section One\\n\\nContent")
+        >>> sections = parse_sections("# Title\n\nIntro text\n\n## Section One\n\nContent")
         >>> len(sections)
         2
         >>> sections[0].anchor

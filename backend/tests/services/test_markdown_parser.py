@@ -1,7 +1,5 @@
 """Tests for the markdown section parser."""
 
-import pytest
-
 from src.services.markdown_parser import extract_title, generate_anchor, parse_sections
 
 
@@ -41,7 +39,10 @@ class TestExtractTitle:
 
 class TestParseSections:
     def test_simple_document_with_two_sections(self):
-        md = "# Title\n\nIntro text\n\n## Section One\n\nContent one\n\n## Section Two\n\nContent two"
+        md = (
+            "# Title\n\nIntro text\n\n## Section One\n\n"
+            "Content one\n\n## Section Two\n\nContent two"
+        )
         sections = parse_sections(md)
 
         assert len(sections) == 3  # intro + 2 sections
@@ -89,7 +90,11 @@ class TestParseSections:
         assert sections == []
 
     def test_document_with_code_blocks_containing_hashes(self):
-        md = "# Title\n\n## Real Section\n\nContent\n\n```python\n## This is a comment\n```\n\n## Next Section\n\nMore content"
+        md = (
+            "# Title\n\n## Real Section\n\nContent\n\n"
+            "```python\n## This is a comment\n```\n\n"
+            "## Next Section\n\nMore content"
+        )
         sections = parse_sections(md)
 
         # The ## inside the code block should ideally not be treated as a heading.
