@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     github_webhook_secret: str
     github_repo_owner: str = "Cydonia-Labs"
     github_repo_name: str = "dev-workflows"
+    github_seed_token: str = ""
     vapid_private_key: str = ""
     vapid_public_key: str = ""
     vapid_claim_email: str = ""

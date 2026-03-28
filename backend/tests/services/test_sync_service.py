@@ -2,6 +2,9 @@
 
 from src.services.sync_service import _parse_readme_doc_order, _slug_from_filename
 
+# Note: seed_if_empty requires a real database session and GitHub API client,
+# so it's tested via integration tests. Unit tests here cover the helper functions.
+
 
 class TestSlugFromFilename:
     def test_removes_md_extension(self):

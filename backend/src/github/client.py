@@ -37,13 +37,16 @@ class GitHubClient:
         self.token = token
         self.repo_owner = repo_owner
         self.repo_name = repo_name
+        headers = {
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        }
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+
         self._client = httpx.AsyncClient(
             base_url=GITHUB_API_BASE,
-            headers={
-                "Authorization": f"Bearer {token}",
-                "Accept": "application/vnd.github+json",
-                "X-GitHub-Api-Version": "2022-11-28",
-            },
+            headers=headers,
             timeout=30.0,
         )
 

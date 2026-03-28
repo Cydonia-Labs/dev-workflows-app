@@ -13,9 +13,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from src.config import get_settings
+from src.database import async_session_factory
+from src.github.client import GitHubClient
 from src.middleware.rate_limit import RateLimitMiddleware
 from src.middleware.security_headers import SecurityHeadersMiddleware
 from src.routers import auth, changes, comments, documents, notifications, webhooks
+from src.services.sync_service import seed_if_empty
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +33,25 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     Yields:
         Control to the application for the duration of its lifetime.
     """
-    # Startup: any initialization goes here
+    # Startup: seed docs from GitHub if the database is empty
+    settings = get_settings()
+    if settings.environment != "test":
+        # Use GITHUB_SEED_TOKEN if available, otherwise try unauthenticated.
+        # A token is required for private repos.
+        seed_token = settings.github_seed_token or ""
+        github = GitHubClient(
+            token=seed_token,
+            repo_owner=settings.github_repo_owner,
+            repo_name=settings.github_repo_name,
+        )
+        try:
+            async with async_session_factory() as db:
+                await seed_if_empty(db, github)
+        except Exception:
+            logger.warning("Startup seed failed — docs will be empty until webhook fires")
+        finally:
+            await github.close()
+
     yield
     # Shutdown: any cleanup goes here
 

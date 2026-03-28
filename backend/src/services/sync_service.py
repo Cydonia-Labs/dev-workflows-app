@@ -1,13 +1,15 @@
 """Content sync service for pulling docs from GitHub into the database.
 
-Handles the webhook-triggered flow: fetch markdown files from GitHub,
-parse them into sections, and upsert into PostgreSQL.
+Handles both the webhook-triggered flow and startup seeding: fetch
+markdown files from GitHub, parse them into sections, and upsert
+into PostgreSQL.
 """
 
+import logging
 import re
 from datetime import datetime, timezone
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.github.client import GitHubClient
@@ -15,6 +17,8 @@ from src.models.document import Document
 from src.models.section import Section
 from src.models.sync_log import SyncLog
 from src.services.markdown_parser import ParsedSection, extract_title, parse_sections
+
+logger = logging.getLogger(__name__)
 
 
 def _slug_from_filename(filename: str) -> str:
@@ -178,3 +182,35 @@ def _insert_sections(
 
         db.add(section)
         anchor_to_section[parsed.anchor] = section
+
+
+async def seed_if_empty(db: AsyncSession, github: GitHubClient) -> bool:
+    """Seed the database with docs from GitHub if no documents exist.
+
+    Called on app startup to ensure the DB is never empty on a fresh
+    deploy or after a database reset. If documents already exist,
+    this is a no-op.
+
+    Args:
+        db: Database session.
+        github: GitHub API client configured for the handbook repo.
+
+    Returns:
+        True if seeding was performed, False if docs already existed.
+    """
+    result = await db.execute(select(func.count(Document.id)))
+    count = result.scalar_one()
+
+    if count > 0:
+        logger.info("Database has %d documents, skipping seed", count)
+        return False
+
+    logger.info("Database is empty, seeding from GitHub...")
+    try:
+        commit_sha = await github.get_latest_commit_sha()
+        files_updated = await sync_from_github(db, github, commit_sha)
+        logger.info("Seed complete: %d documents synced", files_updated)
+        return True
+    except Exception:
+        logger.exception("Seed from GitHub failed")
+        return False
