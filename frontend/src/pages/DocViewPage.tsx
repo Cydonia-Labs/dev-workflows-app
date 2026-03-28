@@ -33,6 +33,25 @@ export function DocViewPage() {
   const totalComments = doc.sections.reduce((sum, s) => sum + s.comment_count, 0);
   const h2Sections = doc.sections.filter((s) => s.heading_level === 2);
 
+  /**
+   * Find the H2 anchor that owns a given section.
+   * For H2 sections, returns itself. For H3, returns its parent H2.
+   */
+  function getDiscussionAnchor(sectionAnchor: string): string | null {
+    let lastH2: string | null = null;
+    for (const s of doc.sections) {
+      if (s.heading_level === 2) lastH2 = s.anchor;
+      if (s.anchor === sectionAnchor) return lastH2;
+    }
+    return null;
+  }
+
+  /** Open the discussion panel directly to a section's H2 discussion. */
+  function openDiscussionFor(sectionAnchor: string) {
+    const h2Anchor = getDiscussionAnchor(sectionAnchor);
+    if (h2Anchor) setDiscussionAnchor(h2Anchor);
+  }
+
   return (
     <div className="doc-view">
       <div className="doc-header">
@@ -93,12 +112,16 @@ export function DocViewPage() {
           <ul>
             {doc.sections.map((section) => (
               <li key={section.anchor} className={section.heading_level === 3 ? "toc-indent" : ""}>
-                <a href={`#${section.anchor}`}>
-                  {section.title}
-                  {section.comment_count > 0 && (
-                    <span className="comment-badge">{section.comment_count}</span>
-                  )}
-                </a>
+                <a href={`#${section.anchor}`}>{section.title}</a>
+                {section.comment_count > 0 && (
+                  <button
+                    className="comment-badge comment-badge-btn"
+                    onClick={() => openDiscussionFor(section.anchor)}
+                    title={`${section.comment_count} comment${section.comment_count > 1 ? "s" : ""} — click to open discussion`}
+                  >
+                    {section.comment_count}
+                  </button>
+                )}
               </li>
             ))}
           </ul>

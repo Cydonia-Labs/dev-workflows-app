@@ -118,10 +118,15 @@
   margin-bottom: 0.25rem;
 }
 
-.table-of-contents li a {
+.table-of-contents li {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.25rem;
+}
+
+.table-of-contents li a {
+  flex: 1;
   font-size: 0.8rem;
   color: #555;
   text-decoration: none;
@@ -142,7 +147,18 @@
   font-size: 0.7rem;
   padding: 0.1rem 0.4rem;
   border-radius: 10px;
-  margin-left: 0.5rem;
+  flex-shrink: 0;
+}
+
+.comment-badge-btn {
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.comment-badge-btn:hover {
+  background: #0366d6;
+  color: #fff;
 }
 
 /* Document content */
