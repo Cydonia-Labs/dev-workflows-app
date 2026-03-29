@@ -4,6 +4,7 @@ Revision ID: 97eae9d900ad
 Revises: 8a534c4a69f3
 Create Date: 2026-03-29 18:11:59.683286
 """
+# ruff: noqa: UP007, UP035, I001
 from typing import Sequence, Union
 
 from alembic import op
