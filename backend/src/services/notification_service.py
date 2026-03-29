@@ -121,8 +121,9 @@ async def save_push_subscription(
 ) -> PushSubscription:
     """Save or update a Web Push subscription.
 
-    If a subscription with the same endpoint already exists, updates
-    the keys. Otherwise creates a new subscription.
+    If a subscription with the same endpoint already exists and belongs
+    to the same user, updates the keys. If it belongs to a different
+    user, raises ValueError to prevent subscription takeover.
 
     Args:
         db: Database session.
@@ -133,13 +134,17 @@ async def save_push_subscription(
 
     Returns:
         The created or updated PushSubscription.
+
+    Raises:
+        ValueError: If the endpoint is already registered to a different user.
     """
     stmt = select(PushSubscription).where(PushSubscription.endpoint == endpoint)
     result = await db.execute(stmt)
     sub = result.scalar_one_or_none()
 
     if sub:
-        sub.user_id = user_id
+        if sub.user_id != user_id:
+            raise ValueError("Subscription endpoint belongs to another user")
         sub.p256dh_key = p256dh_key
         sub.auth_key = auth_key
     else:
@@ -156,14 +161,20 @@ async def save_push_subscription(
     return sub
 
 
-async def remove_push_subscription(db: AsyncSession, endpoint: str) -> None:
-    """Remove a Web Push subscription by endpoint.
+async def remove_push_subscription(db: AsyncSession, user_id, endpoint: str) -> None:
+    """Remove a Web Push subscription by endpoint, scoped to the requesting user.
+
+    Only deletes the subscription if it belongs to the specified user.
 
     Args:
         db: Database session.
+        user_id: UUID of the requesting user (for authorization).
         endpoint: The push service endpoint URL to remove.
     """
-    stmt = select(PushSubscription).where(PushSubscription.endpoint == endpoint)
+    stmt = select(PushSubscription).where(
+        PushSubscription.endpoint == endpoint,
+        PushSubscription.user_id == user_id,
+    )
     result = await db.execute(stmt)
     sub = result.scalar_one_or_none()
     if sub:

@@ -1,6 +1,7 @@
 """Authentication service for GitHub OAuth and JWT session management."""
 
 from datetime import UTC, datetime, timedelta
+from urllib.parse import urlencode
 
 import httpx
 import jwt
@@ -39,8 +40,7 @@ def build_authorize_url(state: str) -> str:
         "scope": "repo",
         "state": state,
     }
-    query = "&".join(f"{k}={v}" for k, v in params.items())
-    return f"{GITHUB_AUTHORIZE_URL}?{query}"
+    return f"{GITHUB_AUTHORIZE_URL}?{urlencode(params)}"
 
 
 async def exchange_code_for_token(code: str) -> str:

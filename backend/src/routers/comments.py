@@ -185,7 +185,7 @@ async def resolve_thread(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> CommentResponse:
-    """Mark a comment thread as resolved.
+    """Mark a comment thread as resolved (author only).
 
     Args:
         comment_id: UUID of the top-level comment to resolve.
@@ -197,10 +197,13 @@ async def resolve_thread(
 
     Raises:
         HTTPException(404): If the comment is not found.
+        HTTPException(403): If the user is not the comment author.
     """
     comment = await get_comment_by_id(db, comment_id)
     if comment is None:
         raise HTTPException(status_code=404, detail="Comment not found")
+    if comment.author_id != user.id:
+        raise HTTPException(status_code=403, detail="Only the author can resolve this thread")
 
     resolved = await resolve_comment(db, comment)
     return _comment_to_response(resolved)

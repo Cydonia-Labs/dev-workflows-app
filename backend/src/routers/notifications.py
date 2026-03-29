@@ -1,6 +1,6 @@
 """Notification and push subscription routes."""
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import get_settings
@@ -92,13 +92,16 @@ async def subscribe_push(
     Returns:
         A confirmation message.
     """
-    await save_push_subscription(
-        db,
-        user_id=user.id,
-        endpoint=body.endpoint,
-        p256dh_key=body.keys.p256dh,
-        auth_key=body.keys.auth,
-    )
+    try:
+        await save_push_subscription(
+            db,
+            user_id=user.id,
+            endpoint=body.endpoint,
+            p256dh_key=body.keys.p256dh,
+            auth_key=body.keys.auth,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     return {"status": "subscribed"}
 
 
@@ -118,7 +121,7 @@ async def unsubscribe_push(
     Returns:
         A confirmation message.
     """
-    await remove_push_subscription(db, body.endpoint)
+    await remove_push_subscription(db, user.id, body.endpoint)
     return {"status": "unsubscribed"}
 
 
