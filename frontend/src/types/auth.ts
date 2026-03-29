@@ -8,6 +8,8 @@ export interface UserResponse {
   display_name: string;
   /** URL to GitHub avatar image. */
   avatar_url: string | null;
+  /** Whether the user has admin privileges. */
+  is_admin: boolean;
 }
 
 /** Response from the OAuth callback endpoint. */

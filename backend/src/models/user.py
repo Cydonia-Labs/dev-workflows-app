@@ -3,7 +3,7 @@
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import BigInteger, DateTime, String, Text
+from sqlalchemy import BigInteger, Boolean, DateTime, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -20,6 +20,7 @@ class User(Base):
         display_name: User's display name from GitHub profile.
         avatar_url: URL to the user's GitHub avatar.
         github_token: Encrypted OAuth access token for GitHub API calls.
+        is_admin: Whether the user has admin privileges.
         created_at: When the user first authenticated.
         updated_at: When the user record was last updated.
     """
@@ -32,6 +33,7 @@ class User(Base):
     display_name: Mapped[str] = mapped_column(String(255), nullable=False)
     avatar_url: Mapped[str | None] = mapped_column(String(2048))
     github_token: Mapped[str] = mapped_column(Text, nullable=False)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )

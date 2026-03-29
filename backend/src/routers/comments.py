@@ -42,6 +42,7 @@ def _comment_to_response(comment) -> CommentResponse:
             github_login=comment.author.github_login,
             display_name=comment.author.display_name,
             avatar_url=comment.author.avatar_url,
+            is_admin=comment.author.is_admin,
         ),
         body=comment.body,
         parent_id=str(comment.parent_id) if comment.parent_id else None,

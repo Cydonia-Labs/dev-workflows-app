@@ -13,18 +13,33 @@ import { Outlet, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/hooks/useDocuments";
 import { NotificationBell } from "@/components/NotificationBell";
+import { apiFetch } from "@/api/client";
 import "./AppShell.css";
 
 /** Top-level layout component wrapping all routes. */
 export function AppShell() {
   const { user, isAuthenticated, login, logout } = useAuth();
-  const { data: documents } = useDocuments();
+  const { data: documents, refetch: refetchDocs } = useDocuments();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   /** Close the mobile menu when a link is clicked. */
   function handleNavClick() {
     setMobileMenuOpen(false);
+  }
+
+  /** Trigger a manual content resync from GitHub. */
+  async function handleResync() {
+    setSyncing(true);
+    try {
+      await apiFetch("/api/sync", { method: "POST" });
+      await refetchDocs();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Sync failed");
+    } finally {
+      setSyncing(false);
+    }
   }
 
   /** Shared navigation content used by both sidebar and mobile menu. */
@@ -66,6 +81,19 @@ export function AppShell() {
               >
                 Notifications
               </Link>
+            </li>
+          </ul>
+        </>
+      )}
+
+      {user?.is_admin && (
+        <>
+          <h3 className="sidebar-heading">Admin</h3>
+          <ul>
+            <li>
+              <button className="sidebar-action" onClick={handleResync} disabled={syncing}>
+                {syncing ? "Syncing…" : "Resync Content"}
+              </button>
             </li>
           </ul>
         </>

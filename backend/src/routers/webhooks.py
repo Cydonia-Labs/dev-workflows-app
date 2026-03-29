@@ -1,19 +1,23 @@
-"""GitHub webhook handler for content sync triggers."""
+"""GitHub webhook handler and manual content sync triggers."""
 
 import hashlib
 import hmac
+import json as json_lib
 import logging
 
-from fastapi import APIRouter, Header, HTTPException, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import get_settings
-from src.database import async_session_factory
+from src.database import async_session_factory, get_db
+from src.dependencies import get_current_user
 from src.github.client import GitHubClient
+from src.models.user import User
 from src.services.sync_service import sync_from_github
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/webhooks", tags=["webhooks"])
+router = APIRouter(tags=["webhooks"])
 
 
 def _verify_signature(payload: bytes, signature: str, secret: str) -> bool:
@@ -31,7 +35,7 @@ def _verify_signature(payload: bytes, signature: str, secret: str) -> bool:
     return hmac.compare_digest(expected, signature)
 
 
-@router.post("/github")
+@router.post("/api/webhooks/github")
 async def github_webhook(
     request: Request,
     x_hub_signature_256: str | None = Header(None),
@@ -70,8 +74,6 @@ async def github_webhook(
     if x_github_event != "push":
         return {"status": "ignored", "reason": f"event type: {x_github_event}"}
 
-    import json as json_lib
-
     body = json_lib.loads(payload)
 
     # Only sync on pushes to main
@@ -81,10 +83,8 @@ async def github_webhook(
     commit_sha = body.get("after", "unknown")
     logger.info("Webhook received: push to main (%s), starting sync", commit_sha)
 
-    # Use a service-level token for sync (the webhook doesn't carry a user token)
-    # In production, this should use a GitHub App installation token.
     github = GitHubClient(
-        token=settings.github_client_secret,  # Placeholder — see note below
+        token=settings.github_seed_token,
         repo_owner=settings.github_repo_owner,
         repo_name=settings.github_repo_name,
     )
@@ -99,3 +99,47 @@ async def github_webhook(
             raise HTTPException(status_code=500, detail="Sync failed") from exc
         finally:
             await github.close()
+
+
+@router.post("/api/sync")
+async def manual_resync(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
+    """Manually trigger a content sync from GitHub.
+
+    Fetches the latest content from the dev-workflows repo and
+    updates the database. Requires admin privileges.
+
+    Args:
+        user: The authenticated user (must be an admin).
+        db: Database session.
+
+    Returns:
+        A status message with the number of files updated.
+
+    Raises:
+        HTTPException(403): If the user is not an admin.
+        HTTPException(500): If the sync fails.
+    """
+    if not user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    settings = get_settings()
+    logger.info("Manual resync triggered by admin %s", user.github_login)
+
+    github = GitHubClient(
+        token=settings.github_seed_token,
+        repo_owner=settings.github_repo_owner,
+        repo_name=settings.github_repo_name,
+    )
+
+    try:
+        files_updated = await sync_from_github(db, github, commit_sha="manual")
+        logger.info("Manual sync completed: %d files updated", files_updated)
+        return {"status": "synced", "files_updated": str(files_updated)}
+    except Exception as exc:
+        logger.exception("Manual sync failed")
+        raise HTTPException(status_code=500, detail="Sync failed") from exc
+    finally:
+        await github.close()

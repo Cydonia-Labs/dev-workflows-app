@@ -11,12 +11,14 @@ class UserResponse(BaseModel):
         github_login: GitHub username.
         display_name: Display name from GitHub profile.
         avatar_url: URL to GitHub avatar image.
+        is_admin: Whether the user has admin privileges.
     """
 
     id: str
     github_login: str
     display_name: str
     avatar_url: str | None
+    is_admin: bool = False
 
 
 class TokenResponse(BaseModel):

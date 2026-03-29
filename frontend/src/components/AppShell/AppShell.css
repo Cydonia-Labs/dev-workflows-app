@@ -185,6 +185,31 @@
   color: #d1d5da;
 }
 
+/* Sidebar action button (styled like a nav link) */
+.sidebar-action {
+  display: block;
+  width: 100%;
+  padding: 0.4rem 0.75rem;
+  color: #c0c0d0;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.sidebar-action:hover:not(:disabled) {
+  background: #2a2a4a;
+  color: #fff;
+}
+
+.sidebar-action:disabled {
+  color: #666;
+  cursor: wait;
+}
+
 /* Buttons */
 .btn-primary {
   background: #3a3a6a;
@@ -274,6 +299,11 @@
   .mobile-menu li a.active {
     background: #3a3a6a;
     color: #fff;
+  }
+
+  .mobile-menu .sidebar-action {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
   }
 
   /* Hide username on small screens, keep avatar */

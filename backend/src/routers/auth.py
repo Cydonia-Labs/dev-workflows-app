@@ -87,6 +87,7 @@ async def github_callback(
             github_login=user.github_login,
             display_name=user.display_name,
             avatar_url=user.avatar_url,
+            is_admin=user.is_admin,
         ),
     )
 
@@ -106,6 +107,7 @@ async def get_me(user: User = Depends(get_current_user)) -> UserResponse:
         github_login=user.github_login,
         display_name=user.display_name,
         avatar_url=user.avatar_url,
+        is_admin=user.is_admin,
     )
 
 
