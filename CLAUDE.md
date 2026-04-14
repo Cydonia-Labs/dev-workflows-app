@@ -80,3 +80,55 @@ See `.env.example` for the full list. Key ones:
 - `GITHUB_WEBHOOK_SECRET` — HMAC validation for webhooks
 - `VAPID_PRIVATE_KEY` / `VAPID_PUBLIC_KEY` — Web Push signing keys
 - `SECRET_KEY` — JWT signing key
+
+## Language Standards (from claude-configs)
+
+Supplements the project-specific standards above. Sourced from
+[stevemcgregory/claude-configs](https://github.com/stevemcgregory/claude-configs)
+(`CLAUDE-python.md` and `CLAUDE-typescript.md`). Where there is overlap with
+the project-specific rules above, the stricter rule wins.
+
+### Python
+
+#### Pre-commit Checks
+- Always run `ruff check --fix && ruff format` before committing, including auto-generated files like Alembic migrations.
+
+#### Coding Standards
+- Every public function, class, method, and module MUST have a doc comment.
+- Use Google-style docstrings with Args / Returns / Raises / Example sections.
+- Inline comments required for any non-obvious logic, algorithm steps, or magic values.
+- Never leave TODO/FIXME without a brief explanation of what is needed and why.
+- All new functions MUST have corresponding unit tests. No exceptions.
+- Use `pytest`; test files mirror source structure under `tests/`.
+- Minimum coverage: happy path + at least one edge case + one failure/error case.
+- No magic numbers. Define named constants with explanatory comments.
+- Prefer explicit error handling over silent failures.
+- Document all function parameters. No undocumented arguments.
+
+### TypeScript
+
+#### Pre-commit Checks
+- Run `eslint --fix .` and `prettier --write .` before every commit.
+- Resolve all eslint warnings before committing. Do not suppress with `// eslint-disable-*` without a justifying comment.
+- Run `tsc --noEmit` and ensure it passes before committing.
+
+#### Coding Standards
+- Every exported function, class, interface, type, and module MUST have a TSDoc block.
+- Use `@param`, `@returns`, `@throws`, and `@example` tags consistently.
+- All new functions MUST have corresponding unit tests using Vitest.
+- Minimum coverage: happy path + at least one edge case + one failure/error case.
+- Strict mode always on. Never set `"strict": false` in `tsconfig.json`.
+- No `any`. Prefer `unknown` with a narrowing check, or a precise type.
+- No non-null assertions (`!`) in production code. Handle the nullish case explicitly.
+- No magic numbers or magic strings. Define named constants with explanatory comments.
+- Prefer explicit error handling over silent failures.
+
+#### React-Specific
+- Function components only. No class components in new code.
+- Typed props via interfaces. Never use `React.FC` (opaque children typing).
+- Hooks named `useX` and colocated next to the component that owns them, or hoisted to `src/hooks/` if shared.
+- Keep effects narrow. Every `useEffect` should have an exhaustive dependency array or a justifying comment.
+
+#### Package Management
+- Lockfile is authoritative. Never commit `package.json` changes without the matching lockfile update.
+- Pin exact versions for tooling (eslint, prettier, vitest, typescript). Caret-range runtime deps are fine.
