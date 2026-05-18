@@ -5,7 +5,7 @@ import hmac
 import json as json_lib
 import logging
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import get_settings
@@ -18,6 +18,44 @@ from src.services.sync_service import sync_from_github
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["webhooks"])
+
+# Tracks commit SHAs whose syncs are currently scheduled or running, so
+# GitHub retrying after its 10s delivery timeout doesn't kick off duplicate
+# concurrent syncs. In-memory state — acceptable for the single-instance
+# Railway deployment; would need Redis or a DB-backed lock for multi-instance.
+_syncs_in_progress: set[str] = set()
+
+
+async def _run_sync_in_background(commit_sha: str) -> None:
+    """Run a content sync outside the request lifecycle.
+
+    Opens its own DB session and GitHub client because the request scope
+    is already torn down by the time FastAPI invokes this. Errors are
+    logged rather than raised — there is no caller to return them to.
+
+    Args:
+        commit_sha: The commit SHA that triggered this sync.
+    """
+    settings = get_settings()
+    github = GitHubClient(
+        token=settings.github_seed_token,
+        repo_owner=settings.github_repo_owner,
+        repo_name=settings.github_repo_name,
+    )
+
+    try:
+        async with async_session_factory() as db:
+            files_updated = await sync_from_github(db, github, commit_sha)
+            logger.info(
+                "Background sync completed for %s: %d files updated",
+                commit_sha,
+                files_updated,
+            )
+    except Exception:
+        logger.exception("Background sync failed for commit %s", commit_sha)
+    finally:
+        await github.close()
+        _syncs_in_progress.discard(commit_sha)
 
 
 def _verify_signature(payload: bytes, signature: str, secret: str) -> bool:
@@ -38,23 +76,26 @@ def _verify_signature(payload: bytes, signature: str, secret: str) -> bool:
 @router.post("/api/webhooks/github")
 async def github_webhook(
     request: Request,
+    background_tasks: BackgroundTasks,
     x_hub_signature_256: str | None = Header(None),
     x_github_event: str | None = Header(None),
 ) -> dict[str, str]:
     """Handle GitHub webhook events.
 
-    Validates the HMAC-SHA256 signature, then dispatches based on
-    event type. Currently handles push events to main, triggering
-    a content sync.
+    Validates the HMAC-SHA256 signature and filters by event type, then
+    schedules a sync as a background task and returns immediately. GitHub
+    webhook deliveries have a hard 10-second timeout; running the sync
+    inline blew past that on any non-trivial doc set.
 
     Args:
         request: The incoming HTTP request.
-        db: Database session.
+        background_tasks: FastAPI scheduler for post-response work.
         x_hub_signature_256: GitHub's HMAC signature header.
         x_github_event: The event type header.
 
     Returns:
-        A status message.
+        A status message. "accepted" means a sync was scheduled,
+        "in_progress" means one is already running for the same commit.
 
     Raises:
         HTTPException(400): If the signature is missing.
@@ -63,42 +104,32 @@ async def github_webhook(
     settings = get_settings()
     payload = await request.body()
 
-    # Validate signature
     if not x_hub_signature_256:
         raise HTTPException(status_code=400, detail="Missing signature")
 
     if not _verify_signature(payload, x_hub_signature_256, settings.github_webhook_secret):
         raise HTTPException(status_code=401, detail="Invalid signature")
 
-    # Only process push events
     if x_github_event != "push":
         return {"status": "ignored", "reason": f"event type: {x_github_event}"}
 
     body = json_lib.loads(payload)
 
-    # Only sync on pushes to main
     if body.get("ref") != "refs/heads/main":
         return {"status": "ignored", "reason": "not main branch"}
 
     commit_sha = body.get("after", "unknown")
-    logger.info("Webhook received: push to main (%s), starting sync", commit_sha)
 
-    github = GitHubClient(
-        token=settings.github_seed_token,
-        repo_owner=settings.github_repo_owner,
-        repo_name=settings.github_repo_name,
-    )
+    # Dedupe against GitHub retries that fire while the previous sync is
+    # still running (the original 10s-timeout scenario this fix addresses).
+    if commit_sha in _syncs_in_progress:
+        logger.info("Webhook received for %s but sync already in progress", commit_sha)
+        return {"status": "in_progress", "commit": commit_sha}
 
-    async with async_session_factory() as db:
-        try:
-            files_updated = await sync_from_github(db, github, commit_sha)
-            logger.info("Sync completed: %d files updated", files_updated)
-            return {"status": "synced", "files_updated": str(files_updated)}
-        except Exception as exc:
-            logger.exception("Sync failed for commit %s", commit_sha)
-            raise HTTPException(status_code=500, detail="Sync failed") from exc
-        finally:
-            await github.close()
+    _syncs_in_progress.add(commit_sha)
+    background_tasks.add_task(_run_sync_in_background, commit_sha)
+    logger.info("Webhook received: push to main (%s), sync scheduled", commit_sha)
+    return {"status": "accepted", "commit": commit_sha}
 
 
 @router.post("/api/sync")
