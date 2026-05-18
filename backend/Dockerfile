@@ -17,4 +17,4 @@ COPY alembic/ ./alembic/
 COPY src/ ./src/
 
 # Run migrations on startup, then start the server
-CMD ["sh", "-c", "alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "alembic upgrade head && uvicorn src.main:app --host :: --port ${PORT:-8000}"]
